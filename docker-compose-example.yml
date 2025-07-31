@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=
+      - POSTGRES_PASSWORD=
+      - POSTGRES_DB=
+    volumes:
+      - api_tickets_pg_data:/var/lib/postgresql/data
+
+
+
+volumes:
+  api_tickets_pg_data:
