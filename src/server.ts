@@ -1,11 +1,14 @@
 import express from 'express'
 import { PrismaClient } from './generated/prisma'
+import userRoutes from './routes/UserRoutes'
+
 
 const app = express()
 const PORT = process.env.PORT
 const prisma = new PrismaClient()
 
 app.use(express.json())
+app.use('/api', userRoutes)
 
 async function main(){
     await prisma.$connect()
