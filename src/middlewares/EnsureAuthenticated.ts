@@ -2,7 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import jwt from 'jsonwebtoken'
 
 interface JwtPayload{
-    userId: number
+    userId: number,
+    role: string
 }
 
 export function authToken(req: Request, res: Response, next: NextFunction){

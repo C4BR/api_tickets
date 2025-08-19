@@ -27,6 +27,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
     } catch (error) {
         if(error instanceof Error){
+            console.log(error)
             return res.status(400).json({error: "Couldn't login user"})
         }
         return res.status(500).json({ error: 'Internal server error' })
