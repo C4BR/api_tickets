@@ -1,22 +1,10 @@
 import { Request, Response } from 'express'
-import { getOpenedTicketsService, changeTicketStatusService } from '../services/AgentServices'
-import { statusToEnum } from '../utils/StringToEnum'
-
-export const getOpenedTickets = async (req: Request, res: Response ) =>{
-    try {
-        const tickets = await getOpenedTicketsService()
-        return res.status(200).json({tickets: tickets})
-    } catch(error){
-        if(error instanceof Error){
-            return res.status(400).json({error: "Couldn't find any ticket"})
-        }
-    }
-}
+import { changeTicketStatusService, getTicketByIdService, getTicketService } from '../services/AgentServices'
+import { statusToEnum } from '../utils/StatusToEnum'
+import { TicketStatus } from '../generated/prisma'
 
 export const changeTicketStatus = async (req: Request, res: Response) =>{
-
     const { ticketId, status } = req.body
-
     try {
         statusToEnum(status)
         const updatedTicket = await changeTicketStatusService(ticketId, status)
@@ -26,7 +14,44 @@ export const changeTicketStatus = async (req: Request, res: Response) =>{
         })
     } catch (error) {
         if(error instanceof Error){
-            return res.status(400).json({error: "Couldn't update ticket"})
+            return res.status(400).json({
+                error: "TICKET_NOT_FOUND",
+                message: `Couldn't find any ticket with id: ${ticketId}`
+            })
+        }
+    }
+}
+
+export const getTicketById = async (req: Request, res: Response) =>{
+    const {id} = req.params
+    try {
+        const ticket = await getTicketByIdService(Number(id))
+        return res.status(200).json({ticket: ticket})
+    } catch (error) {
+        if(error instanceof Error){
+            return res.status(404).json({
+                error: "TICKET_NOT_FOUND",
+                message: `Couldn't find any ticket with id: ${id}`
+            })
+        }
+    }
+}
+
+export const getTickets = async (req: Request, res: Response) => {
+    const status = req.query.status as TicketStatus | undefined
+    try {
+        const tickets = await getTicketService(status)
+        return res.status(200).json({
+            statusFilter: status || "none",
+            count: tickets.length,
+            tickets: tickets
+        })
+    } catch (error) {
+        if(error instanceof Error){
+            return res.status(404).json({
+                error:"TICKET_NOT_FOUND",
+                message: `Couldn't find any ticket with this status: ${status}`,
+            })
         }
     }
 }

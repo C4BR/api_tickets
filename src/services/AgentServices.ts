@@ -2,19 +2,6 @@ import { PrismaClient, TicketStatus } from '../generated/prisma/client'
 
 const prisma = new PrismaClient()
 
-export async function getOpenedTicketsService(){
-    const tickets = await prisma.ticket.findMany({
-        where:{
-            status: "ABERTO"
-        }
-    })
-
-    if(tickets.length <= 0){
-        throw new Error
-    }
-
-    return tickets
-}
 
 export async function changeTicketStatusService(ticketId: number, status: TicketStatus){
     const ticket = await prisma.ticket.findFirst({
@@ -37,4 +24,31 @@ export async function changeTicketStatusService(ticketId: number, status: Ticket
     })
 
     return updatedTicket
+}
+
+export async function getTicketByIdService(ticketId: number){
+    const ticket = await prisma.ticket.findFirst({
+        where:{
+            id: ticketId
+        }
+    })
+
+    if(!ticket){
+        throw new Error
+    }
+
+    return ticket
+}
+
+export async function getTicketService(status: TicketStatus | undefined){
+    const tickets = await prisma.ticket.findMany({
+        where: status? {status} : {
+            status : { not: "FECHADO"}
+        }
+    })
+    if(tickets.length <= 0){
+        throw new Error
+    }
+
+    return tickets
 }
