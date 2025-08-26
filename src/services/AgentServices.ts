@@ -43,6 +43,9 @@ export async function getTicketByIdService(ticketId: number){
 
 export async function getTicketService(status?: TicketStatus, page: number = 1, limit: number = 10){
 
+    const maxLimit = 100
+    const currentLimit = Math.min(limit, maxLimit)
+
     const totalTickets = await prisma.ticket.count({
         where: status? {status} : {
             status: {not: "FECHADO"}
@@ -53,8 +56,8 @@ export async function getTicketService(status?: TicketStatus, page: number = 1, 
         where: status? {status} : {
             status : { not: "FECHADO"}
         },
-        skip: (page -1) * limit,
-        take: limit
+        skip: (page -1) * currentLimit,
+        take: currentLimit
     })
     
     if(tickets.length <= 0){
@@ -65,6 +68,6 @@ export async function getTicketService(status?: TicketStatus, page: number = 1, 
         data: tickets,
         total: totalTickets,
         page,
-        totalPages: Math.ceil(totalTickets/limit) 
+        totalPages: Math.ceil(totalTickets/currentLimit) 
     }
 }
