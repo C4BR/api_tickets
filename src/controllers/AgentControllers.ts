@@ -39,11 +39,14 @@ export const getTicketById = async (req: Request, res: Response) =>{
 
 export const getTickets = async (req: Request, res: Response) => {
     const status = req.query.status as TicketStatus | undefined
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) || 10
+
+
     try {
-        const tickets = await getTicketService(status)
+        const tickets = await getTicketService(status, page, limit)
         return res.status(200).json({
             statusFilter: status || "none",
-            count: tickets.length,
             tickets: tickets
         })
     } catch (error) {

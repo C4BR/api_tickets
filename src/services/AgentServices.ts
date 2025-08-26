@@ -27,6 +27,7 @@ export async function changeTicketStatusService(ticketId: number, status: Ticket
 }
 
 export async function getTicketByIdService(ticketId: number){
+
     const ticket = await prisma.ticket.findFirst({
         where:{
             id: ticketId
@@ -40,15 +41,30 @@ export async function getTicketByIdService(ticketId: number){
     return ticket
 }
 
-export async function getTicketService(status: TicketStatus | undefined){
+export async function getTicketService(status?: TicketStatus, page: number = 1, limit: number = 10){
+
+    const totalTickets = await prisma.ticket.count({
+        where: status? {status} : {
+            status: {not: "FECHADO"}
+        }
+    })
+
     const tickets = await prisma.ticket.findMany({
         where: status? {status} : {
             status : { not: "FECHADO"}
-        }
+        },
+        skip: (page -1) * limit,
+        take: limit
     })
+    
     if(tickets.length <= 0){
         throw new Error
     }
 
-    return tickets
+    return {
+        data: tickets,
+        total: totalTickets,
+        page,
+        totalPages: Math.ceil(totalTickets/limit) 
+    }
 }
