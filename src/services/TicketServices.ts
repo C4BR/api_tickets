@@ -39,7 +39,7 @@ export async function getTicketsService(userId: number, page: number = 1, limit:
     })
 
     if(tickets.length <= 0){
-        throw new Error
+        throw new Error("No ticket's found")
     }
 
     return {
@@ -59,7 +59,7 @@ export async function getTicketByIdService(userId: number, ticketId: number){
     })
 
     if(!ticket){
-        throw new Error
+        throw new Error("No ticket's found")
     }
 
     return ticket

@@ -9,8 +9,8 @@ export const changeTicketStatus = async (req: Request, res: Response) =>{
         statusToEnum(status)
         const updatedTicket = await changeTicketStatusService(ticketId, status)
         return res.status(201).json({
-            message: "Sucessfully updated ticket status",
-            ticket: updatedTicket
+            message: "SUCCESS_IN_UPDATE_TICKET_STATUS",
+            data: updatedTicket
         })
     } catch (error) {
         if(error instanceof Error){
@@ -26,12 +26,15 @@ export const getTicketById = async (req: Request, res: Response) =>{
     const {id} = req.params
     try {
         const ticket = await getTicketByIdService(Number(id))
-        return res.status(200).json({ticket: ticket})
+        return res.status(200).json({
+            message: "SUCCESS_IN_FIND_TICKET",
+            data: ticket
+        })
     } catch (error) {
         if(error instanceof Error){
             return res.status(404).json({
-                error: "TICKET_NOT_FOUND",
-                message: `Couldn't find any ticket with id: ${id}`
+                message: "TICKET_NOT_FOUND",
+                error: `Couldn't find any ticket with id: ${id}`
             })
         }
     }
@@ -46,14 +49,14 @@ export const getTickets = async (req: Request, res: Response) => {
     try {
         const tickets = await getTicketService(status, page, limit)
         return res.status(200).json({
-            statusFilter: status || "none",
-            tickets: tickets
+            filter: status || "none",
+            data: tickets
         })
     } catch (error) {
         if(error instanceof Error){
             return res.status(404).json({
-                error:"TICKET_NOT_FOUND",
-                message: `Couldn't find any ticket with this status: ${status}`,
+                message:"TICKET_NOT_FOUND",
+                error: `Couldn't find any ticket with this status: ${status}`,
             })
         }
     }
