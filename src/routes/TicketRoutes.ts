@@ -3,11 +3,14 @@ import { createTicket, getTickets, getTicketById } from "../controllers/TicketCo
 import { authToken } from "../middlewares/EnsureAuthenticated";
 import { ensureTickets } from "../middlewares/EnsureTickets";
 import { allowedRoles } from "../middlewares/AllowedRoles";
+import messageRoutes from "./MessageRoutes"
 
 const router = Router()
 
 router.post('/tickets', authToken, allowedRoles("USER"), ensureTickets, createTicket)
 router.get('/tickets', authToken, allowedRoles("USER"), getTickets)
 router.get('/tickets/:id', authToken, allowedRoles("USER"), getTicketById)
+
+router.use("/tickets/:ticketId/messages", messageRoutes)
 
 export default router
