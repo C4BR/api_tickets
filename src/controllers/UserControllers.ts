@@ -4,44 +4,21 @@ import { registerUserService, loginUserService } from '../services/UserServices'
 
 export const registerUser = async (req: Request, res: Response) => {
     const { name, email, password } = req.body
-    
-    try {       
-        const user = await registerUserService(name, email, password)
-        return res.status(201).json({
-            message: "SUCCESS", 
-            data: user
-        })
-        
-    } catch (error) {
-        
-        if(error instanceof Error){
-            return res.status(400).json({
-                message: "COULDN'T_CREATE_USER",
-                error: error.message
-            })
-        }
-    }
+       
+    const user = await registerUserService(name, email, password)
+    return res.status(201).json({
+        message: "SUCCESS", 
+        data: user
+    }) 
 }
 
 export const loginUser = async (req: Request, res: Response) => {
         
-        const { email, password } = req.body
+    const { email, password } = req.body
 
-    try {
-        const token = await loginUserService(email, password)
-        return res.status(200).json({
-            message: "SUCCESS",
-            data: token
-            })
-
-    } catch (error) {
-        if(error instanceof Error){
-            console.log(error)
-            return res.status(400).json({
-                message:"FAILED_TO_LOGIN",
-                error: error.message
-            })
-        }
-        return res.status(500).json({ error: 'Internal server error' })
-    }
+    const token = await loginUserService(email, password)
+    return res.status(200).json({
+        message: "SUCCESS",
+        data: token
+    })
 }

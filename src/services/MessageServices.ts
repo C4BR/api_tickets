@@ -1,3 +1,4 @@
+import { MessageError } from '../Errors/MessageError'
 import { PrismaClient, SentBy } from '../generated/prisma'
 
 const prisma = new PrismaClient()
@@ -13,11 +14,11 @@ export async function createMessageService(ticketId: number, userId: number, sen
     })
 
     if(!existingTicket){
-        throw new Error("Messages can only be sent to existing tickets that are not solved or closed")
+        throw new MessageError('MESSAGE_MUST_HAVE_TICKET')
     }
 
     if( sentBy === "USER" && existingTicket.userId !== userId){
-        throw new Error ("User not authorized to send messages to this ticket")
+        throw new MessageError('FORBIDDEN')
     }
 
     return await prisma.message.create({
@@ -39,11 +40,11 @@ export async function getMessagesService(ticketId: number, userId: number, role:
     })
 
     if(!ticket){
-        throw new Error("Ticket doesn't exists")
+        throw new MessageError('TICKET_NOT_FOUND')
     }
 
     if(role === "USER" && ticket.userId !== userId){
-        throw new Error("User not authorized to view messages from this ticket")
+        throw new MessageError('FORBIDDEN')
     }
 
     const messages = await prisma.message.findMany({
@@ -52,6 +53,9 @@ export async function getMessagesService(ticketId: number, userId: number, role:
         include: { user: { select: {id: true, name: true, role: true}}}
     })
 
-    return messages
+    if(messages.length === 0){
+        throw new MessageError('MESSAGES_NOT_FOUND')
+    }
 
+    return messages
 }

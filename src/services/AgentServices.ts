@@ -1,3 +1,4 @@
+import { AgentError } from '../Errors/AgentError'
 import { PrismaClient, TicketStatus } from '../generated/prisma/client'
 
 const prisma = new PrismaClient()
@@ -11,7 +12,7 @@ export async function changeTicketStatusService(ticketId: number, status: Ticket
     })
 
     if(!ticket){
-        throw new Error
+        throw new AgentError('TICKET_NOT_FOUND')
     }
 
     const updatedTicket = await prisma.ticket.update({
@@ -35,7 +36,7 @@ export async function getTicketByIdService(ticketId: number){
     })
 
     if(!ticket){
-        throw new Error
+        throw new AgentError('TICKET_NOT_FOUND')
     }
 
     return ticket
@@ -61,7 +62,7 @@ export async function getTicketService(status?: TicketStatus, page: number = 1, 
     })
     
     if(tickets.length <= 0){
-        throw new Error
+        throw new AgentError('NO_TICKETS_FOUND')
     }
 
     return {

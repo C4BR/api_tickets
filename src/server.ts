@@ -3,6 +3,7 @@ import { PrismaClient } from './generated/prisma'
 import userRoutes from './routes/UserRoutes'
 import ticketRoutes from './routes/TicketRoutes'
 import agentRoutes from './routes/AgentRoutes'
+import { errorHandlerMiddleware } from './middlewares/ErrorHandler'
 
 const app = express()
 const PORT = process.env.PORT
@@ -13,6 +14,8 @@ app.use(express.json())
 app.use('/api', userRoutes)
 app.use('/api', ticketRoutes)
 app.use('/api/agent', agentRoutes)
+
+app.use(errorHandlerMiddleware)
 
 async function main(){
     await prisma.$connect()

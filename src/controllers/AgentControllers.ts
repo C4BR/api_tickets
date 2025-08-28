@@ -4,60 +4,37 @@ import { statusToEnum } from '../utils/StatusToEnum'
 import { TicketStatus } from '../generated/prisma'
 
 export const changeTicketStatus = async (req: Request, res: Response) =>{
+    
     const { ticketId, status } = req.body
-    try {
-        statusToEnum(status)
-        const updatedTicket = await changeTicketStatusService(ticketId, status)
-        return res.status(201).json({
-            message: "SUCCESS_IN_UPDATE_TICKET_STATUS",
-            data: updatedTicket
-        })
-    } catch (error) {
-        if(error instanceof Error){
-            return res.status(400).json({
-                error: "TICKET_NOT_FOUND",
-                message: `Couldn't find any ticket with id: ${ticketId}`
-            })
-        }
-    }
+    
+    statusToEnum(status)
+    const updatedTicket = await changeTicketStatusService(ticketId, status)
+    return res.status(201).json({
+        message: "SUCCESS",
+        data: updatedTicket
+    })   
 }
 
 export const getTicketById = async (req: Request, res: Response) =>{
+    
     const {id} = req.params
-    try {
-        const ticket = await getTicketByIdService(Number(id))
-        return res.status(200).json({
-            message: "SUCCESS_IN_FIND_TICKET",
-            data: ticket
-        })
-    } catch (error) {
-        if(error instanceof Error){
-            return res.status(404).json({
-                message: "TICKET_NOT_FOUND",
-                error: `Couldn't find any ticket with id: ${id}`
-            })
-        }
-    }
+    
+    const ticket = await getTicketByIdService(Number(id))
+    return res.status(200).json({
+        message: "SUCCESS",
+        data: ticket
+    })    
 }
 
 export const getTickets = async (req: Request, res: Response) => {
+    
     const status = req.query.status as TicketStatus | undefined
     const page = Number(req.query.page) || 1
     const limit = Number(req.query.limit) || 10
 
-
-    try {
-        const tickets = await getTicketService(status, page, limit)
-        return res.status(200).json({
-            filter: status || "none",
-            data: tickets
-        })
-    } catch (error) {
-        if(error instanceof Error){
-            return res.status(404).json({
-                message:"TICKET_NOT_FOUND",
-                error: `Couldn't find any ticket with this status: ${status}`,
-            })
-        }
-    }
+    const tickets = await getTicketService(status, page, limit)
+    return res.status(200).json({
+        filter: status || "none",
+        data: tickets
+    })   
 }

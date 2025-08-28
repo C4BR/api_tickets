@@ -1,3 +1,4 @@
+import { TicketError } from "../Errors/TicketError";
 import { PrismaClient } from "../generated/prisma/client";
 
 const prisma = new PrismaClient()
@@ -39,7 +40,7 @@ export async function getTicketsService(userId: number, page: number = 1, limit:
     })
 
     if(tickets.length <= 0){
-        throw new Error("No ticket's found")
+        throw new TicketError('NO_TICKETS_FOUND')
     }
 
     return {
@@ -59,7 +60,7 @@ export async function getTicketByIdService(userId: number, ticketId: number){
     })
 
     if(!ticket){
-        throw new Error("No ticket's found")
+        throw new TicketError('NO_TICKETS_FOUND')
     }
 
     return ticket
