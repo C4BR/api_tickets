@@ -1,17 +1,25 @@
 import { Request, Response, NextFunction } from 'express'
-import { BodyError } from '../Errors/BodyError'
-import { validateName, validateEmail, validatePassword } from '../utils/Validators'
+import { z } from 'zod'
+import { EMAIL_MAX_LENGTH, EMAIL_MIN_LENGTH, NAME_MAX_LENGTH, NAME_MIN_LENGTH, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '../config/Validation'
+
+const createUserSchema = z.object({
+    name: z.string().min(NAME_MIN_LENGTH).max(NAME_MAX_LENGTH),
+    email: z.email().min(EMAIL_MIN_LENGTH).max(EMAIL_MAX_LENGTH),
+    password: z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH)
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
+    "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character")
+})  
 
 export function validateUserPayload(req: Request, res: Response, next: NextFunction){
-    const {name, email, password, ...extra} = req.body
+    
+    const data = createUserSchema.safeParse(req.body)
 
-    if(Object.keys(extra).length > 0){
-        throw new BodyError('BODY_HAS_EXTRA_FIELDS')
+    if(!data.success){
+        return res.status(400).json({
+            message: "VALIDATION_ERROR",
+            error: data.error.issues
+        })
     }
-
-    validateName(name)
-    validateEmail(email)
-    validatePassword(password)
 
     next()
 }
