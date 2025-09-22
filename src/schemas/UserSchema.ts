@@ -3,9 +3,9 @@ import { NAME_MAX_LENGTH, NAME_MIN_LENGTH, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LEN
 import { z } from 'zod'
 
 export const nameSchema = z
- .string()
- .min(NAME_MIN_LENGTH)
- .max(NAME_MAX_LENGTH)
+    .string()
+    .min(NAME_MIN_LENGTH)
+    .max(NAME_MAX_LENGTH)
 
 export const emailSchema = z
     .email()
