@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from 'jsonwebtoken'
+import { PrismaClient } from "../generated/prisma/client";
+
+const prisma = new PrismaClient()
 
 interface JwtPayload{
     userId: number,
@@ -14,6 +17,7 @@ export function authToken(req: Request, res: Response, next: NextFunction){
     }
     
     const token = authHeader.split(' ')[1]
+    
 
     if(!token){
         return res.status(401).json({message: 'Invalid credentials'})   

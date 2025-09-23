@@ -32,7 +32,12 @@ export async function registerUserService(name: string, email: string, password:
 
 export async function loginUserService(email: string, password: string){
     
-    const user = await prisma.user.findUnique({where: {email}})
+    const user = await prisma.user.findUnique({
+        where: {
+            email,
+            deletedAt: null
+        }
+    })
 
     if(!user || !await bcrypt.compare(password, user.password)){
         throw new UserError('INVALID_CREDENTIALS')
@@ -40,6 +45,14 @@ export async function loginUserService(email: string, password: string){
 
     const token = jwt.sign({userId: user.id, role: user.role}, process.env.JWT_SECRET!, {
         expiresIn: '24h'
+    })
+
+    await prisma.session.create({
+        data: {
+            userId: user.id,
+            token: token,
+            expired: false
+        }
     })
 
     return token
@@ -56,8 +69,17 @@ export async function deleteUserService(userId: number, password: string){
     }
 
     const deletedUser = await prisma.user.update({
-        where: {id: userId},
-        data: {deletedAt: new Date()}
+        where: { id: userId },
+        data: {
+            deletedAt: new Date()
+        }
+    })
+
+    await prisma.session.updateMany({
+        where: { id: userId },
+        data: {
+            expired: true
+        }
     })
 
     return deletedUser
