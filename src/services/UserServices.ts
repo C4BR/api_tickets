@@ -2,7 +2,7 @@ import { PrismaClient } from "../generated/prisma/client";
 import bcrypt from 'bcrypt'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import { UserError } from "../Errors/UserError";
-
+import crypto from 'crypto'
 
 const prisma = new PrismaClient()
 
@@ -43,19 +43,59 @@ export async function loginUserService(email: string, password: string){
         throw new UserError('INVALID_CREDENTIALS')
     }
 
+    const activeSessions = await prisma.session.findMany({
+        where: {
+            userId: user.id,
+            expired: false
+        },
+        orderBy: {
+            createdAt: "asc"
+        }
+    })
+
+    const maxSessions = 5
+    
+    if(activeSessions.length >= maxSessions){
+        const sessionsToExpire = activeSessions.slice(0, activeSessions.length - maxSessions + 1)
+        await prisma.session.updateMany({
+            where:{
+                id: { in: sessionsToExpire.map(s => s.id)}
+            },
+            data:{
+                expired: true
+            }
+        })
+    }
+
     const token = jwt.sign({userId: user.id, role: user.role}, process.env.JWT_SECRET!, {
         expiresIn: '24h'
     })
 
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
+
     await prisma.session.create({
         data: {
             userId: user.id,
-            token: token,
+            token: hashedToken,
             expired: false
         }
     })
 
     return token
+}
+
+export async function logoutUserService(token: string){
+    
+    await prisma.session.update({
+        where: {
+            token: token
+        },
+        data: {
+            expired: true
+        }
+    })
+
+    return
 }
 
 export async function deleteUserService(userId: number, password: string){

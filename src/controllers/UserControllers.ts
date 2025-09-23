@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
-import { registerUserService, loginUserService, deleteUserService } from '../services/UserServices'
+import { registerUserService, loginUserService, logoutUserService, deleteUserService } from '../services/UserServices'
+import crypto from 'crypto'
 
 
 export const registerUser = async (req: Request, res: Response) => {
@@ -21,6 +22,14 @@ export const loginUser = async (req: Request, res: Response) => {
         message: "SUCCESS",
         data: token
     })
+}
+
+export const logoutUser = async (req: Request, res: Response) => {
+    
+    const token = req.headers.authorization!.split(" ")[1]
+    const hashedToken = crypto.createHash('sha256').update(token!).digest("hex")
+    await logoutUserService(hashedToken)
+    return res.status(200).json({ message: "Logout succesful!"})
 }
 
 export const deleteUser = async (req: Request, res: Response) => {

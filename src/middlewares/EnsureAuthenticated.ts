@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from 'jsonwebtoken'
 import { PrismaClient } from "../generated/prisma/client";
+import crypto from 'crypto'
+import { AuthError } from "../Errors/AuthError";
 
 const prisma = new PrismaClient()
 
@@ -9,31 +11,37 @@ interface JwtPayload{
     role: string
 }
 
-export function authToken(req: Request, res: Response, next: NextFunction){
+export async function authToken(req: Request, res: Response, next: NextFunction){
     const authHeader = req.headers['authorization']
     
     if(!authHeader?.toLowerCase().startsWith('bearer ')){
-        return res.status(401).json({message: 'Missing or malformed Authorization header'})
+        throw new AuthError('MISSING_TOKEN')
     }
     
     const token = authHeader.split(' ')[1]
-    
-
-    if(!token){
-        return res.status(401).json({message: 'Invalid credentials'})   
-    }
-
     const secret = process.env.JWT_SECRET
 
-    if(!secret){
-        throw new Error('JWT_SECRET not configured')
+    if(!token){
+        throw new AuthError ('MISSING_TOKEN')
     }
 
-    jwt.verify(token, secret, (err, decoded) =>{
-        if(err){
-            return res.status(401).json({message: 'Invalid token'})     
+    if(!secret){
+        throw new Error('JWT_SECRET not configured!')
+    }
+
+    const decoded = jwt.verify(token, secret) as JwtPayload
+    
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
+    const isValidToken = await prisma.session.findUnique({
+        where: {
+            token: hashedToken
         }
-        req.user = decoded as JwtPayload
-        next()
-    });  
+    })
+
+    if(!isValidToken || isValidToken.expired){
+        throw new AuthError('SESSION_EXPIRED')
+    }
+
+    req.user = decoded
+    next()
 }
