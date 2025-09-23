@@ -115,6 +115,15 @@ export async function deleteUserService(userId: number, password: string){
         }
     })
 
+    await prisma.ticket.updateMany({
+        where: {
+            status: { not: 'FECHADO'}
+        },
+        data: {
+            status: 'FECHADO'
+        }
+    })
+
     await prisma.session.updateMany({
         where: { 
             userId: userId,
