@@ -116,11 +116,16 @@ export async function deleteUserService(userId: number, password: string){
     })
 
     await prisma.session.updateMany({
-        where: { id: userId },
+        where: { 
+            userId: userId,
+            expired: false
+        },
         data: {
             expired: true
         }
     })
 
-    return deletedUser
+    const { password: _, ...userWithoutPassword } = deletedUser
+    
+    return userWithoutPassword
 }
