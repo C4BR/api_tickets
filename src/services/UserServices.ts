@@ -45,3 +45,20 @@ export async function loginUserService(email: string, password: string){
     return token
 }
 
+export async function deleteUserService(userId: number, password: string){
+    
+    const user = await prisma.user.findUnique({
+        where: {id: userId}
+    })
+    
+    if(!await bcrypt.compare(password, user!.password)){
+        throw new UserError('WRONG_PASSWORD')
+    }
+
+    const deletedUser = await prisma.user.update({
+        where: {id: userId},
+        data: {deletedAt: new Date()}
+    })
+
+    return deletedUser
+}

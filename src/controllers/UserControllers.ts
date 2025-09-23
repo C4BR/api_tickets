@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { registerUserService, loginUserService } from '../services/UserServices'
+import { registerUserService, loginUserService, deleteUserService } from '../services/UserServices'
 
 
 export const registerUser = async (req: Request, res: Response) => {
@@ -20,5 +20,17 @@ export const loginUser = async (req: Request, res: Response) => {
     return res.status(200).json({
         message: "SUCCESS",
         data: token
+    })
+}
+
+export const deleteUser = async (req: Request, res: Response) => {
+    
+    const userId = Number(req.user.userId)
+    const { password } = req.body
+
+    const deletedUser = await deleteUserService(userId, password)
+    return res.status(200).json({
+        message: "SUCESS",
+        deletedUser: deletedUser
     })
 }

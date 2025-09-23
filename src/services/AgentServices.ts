@@ -1,3 +1,4 @@
+import { nullable } from 'zod'
 import { AgentError } from '../Errors/AgentError'
 import { PrismaClient, TicketStatus } from '../generated/prisma/client'
 
@@ -7,7 +8,10 @@ const prisma = new PrismaClient()
 export async function changeTicketStatusService(ticketId: number, status: TicketStatus){
     const ticket = await prisma.ticket.findFirst({
         where:{
-            id: ticketId
+            id: ticketId,
+            user: {
+                deletedAt: null
+            }
         }
     })
 
@@ -31,7 +35,10 @@ export async function getTicketByIdService(ticketId: number){
 
     const ticket = await prisma.ticket.findFirst({
         where:{
-            id: ticketId
+            id: ticketId,
+            user: {
+                deletedAt: null
+            }
         }
     })
 
@@ -49,7 +56,10 @@ export async function getTicketService(status?: TicketStatus, page: number = 1, 
 
     const totalTickets = await prisma.ticket.count({
         where: status? {status} : {
-            status: {not: "FECHADO"}
+            status: {not: "FECHADO"},
+            user: {
+                deletedAt: null
+            }
         }
     })
 
